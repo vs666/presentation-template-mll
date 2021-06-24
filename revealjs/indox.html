@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>reveal.js</title>
+
+    <link rel="stylesheet" href="dist/reset.css">
+    <link rel="stylesheet" href="dist/reveal.css">
+    <link rel="stylesheet" href="dist/theme/custom1.css">
+
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="plugin/highlight/monokai.css">
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section data-background-image="./assets/background-slides.png">
+                <h2 id="title">Compound Hashing</h2>
+                <h2 id="subtitle">Towards a leak tolerant password database</h2>
+                <p class="fragment" data-fragment-index="1">presented By</p>
+                <p class="fragment" data-fragment-index="1" id="author"></p>
+                <p class="fragment" data-fragment-index="2">
+                    <a href="https://mll.iiit.ac.in" target="blank_">Machine Learning Lab, IIIT
+						Hyderabad</a>
+                </p>
+
+            </section>
+            <section>
+                <section>
+                    <h1>The Problem</h1>
+                    <iframe data-autoplay title="Recent Password Leak (June 9 2021)" width="auto" height="auto" src="https://www.youtube.com/embed/4VbkayaALtM?start=27"></iframe>
+                </section>
+                <section>
+                    <p class="fragment" data-fragment-index="0">
+                        Password Database leaks are very common in today's cyber-world
+                    </p>
+                    <p class="fragment" data-fragment-index="1">
+                        The passwords are stored in Hashed forms in these database
+                    </p>
+                    <p class="fragment" data-fragment-index="2">
+                        So, to find out the actual password, attacker will have to compare hash of Guessed password with the actual.
+                        </br>
+                        If the two hashes are equal, then the passwords are equal, otherwise not.
+                    </p>
+                </section>
+                <section>
+                    <blockquote cite="https://www.hipaajournal.com/study-1-5-enterprise-users-set-weak-passwords-8850/">
+                        &ldquo;The study revealed that an average of 19.1% of enterprise users have set poor passwords, either those that have been used elsewhere, have been shared or are particularly weak.
+                        </br>
+                        This translates to 1 in 5 enterprise users having a password that could easily be guessed by a threat actor.&rdquo;
+                    </blockquote>
+                </section>
+            </section>
+            <section>
+
+                <section data-markdown data-background-color="rgb(31,31,125)">
+                    <textarea data-template>
+							## Existing Solution
+							
+						</textarea>
+                </section>
+                <section data-markdown data-background-color="rgb(31,31,125)">
+                    <textarea data-template>
+							### Password Salting
+							
+							* Password salting is to add a secret string, to a password before taking its hash. 		
+							* Then, as long as the secret string is relatively random and not leaked, even database leak will not result in hits with dictionary attacks, database files attacks etc.
+							* However, once the salt is cracked (by various efficient methods), the cracking of passwords with salting is essentially same as those without passwords.
+						</textarea>
+                </section>
+                <section data-background-color="#bbbbcc">
+                    <h2>Performance Analysis of Password Salting</h2>
+                    <blockquote> Suppose we have a file of leaked password hashes &eta;, and we have a set of potential salts &kappa;, then the complexity of cracking all passwords is O(&eta;&kappa;) in the worst case.
+                    </blockquote>
+                    <blockquote> However, if we know one of the passwords (maybe because it is our account), then, we can reduce the complexity to O(&eta;+&kappa;) in the worst case.</blockquote>
+                </section>
+            </section>
+            <section>
+                <section>
+                    <h1>Our solution</h1>
+                    <p class="r-fit-text">We propose an algorithmic mapping, where all the credentials are seperated into <code style="color: brown;">k</code> sets randomly.</p>
+                    <p class="r-fit-text">For example, consider username <code style="color: #cccc00;">alice.bob</code> and password <code style="color: #cccc00;">abcd</code>. Now, to store the password of this case, we will take hash of username, and password and then the
+                        hash of the 2 hashes.</p>
+                </section>
+                <section data-auto-animate>
+                    <h2 data-id="code-title">Explaination using Code</h2>
+                    <pre data-id="code-animation"><code class="hljs" data-trim data-line-numbers="|2-3|4-5|6-7"><script type="text/template">
+							import * from 'crypto-js';
+							var hash_u=SHA256('alice.bob');
+							# hash is -> 4207a2d5e34f03f936d99b1f1b8f3bc588119f1d693a5bdcbf2f863bdb2689bb
+							var hash_p=SHA256('abcd');
+							# hash is -> 88d4266fd4e6338d13b845fcf289579d209c897823b9217da3e161936f031589
+							var hash_m=SHA256(hash_u+hash_p);
+							# hash is -> 189af22a878bd6427fe53f32f4c1160d5919d706278ef3ea842f60e8ac5295a3
+					</script></code></pre>
+
+                </section>
+                <section>
+                    <section>
+
+                        <h2>Complexity analysis of best cracking algorithm</h2>
+                        <p>Assume, password from file matching, with &kappa; passwords, and leaked database has &phi; passwords in set P.</p>
+                        \[\begin{aligned} \eta_{alice.bob} = O(1) \\ \forall p \in P, \eta_{p} = O(\kappa) \\ for \ each \ username, \tau_{i} = O(\kappa + \kappa) \end{aligned} \]
+                    </section>
+                </section>
+            </section>
+
+            <section data-markdown="./mdFiles/SLIDE2.md" data-separator="^\n\n\n" data-separator-vertical="^\n\n" data-separator-notes="^Note:" data-charset="iso-8859-15">
+                <!--
+        Note that Windows uses `\r\n` instead of `\n` as its linefeed character.
+        For a regex that supports all operating systems, use `\r?\n` instead of `\n`.
+    -->
+            </section>
+
+        </div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/math/math.js"></script>
+    <script>
+        // More info about initialization & config:
+        // - https://revealjs.com/initialization/
+        // - https://revealjs.com/config/
+        Reveal.initialize({
+            hash: true,
+            math: {
+                mathjax: 'https://cdn.jsdelivr.net/gh/mathjax/mathjax@2.7.8/MathJax.js',
+                config: 'TeX-AMS_HTML-full',
+                // pass other options into `MathJax.Hub.Config()`
+                TeX: {
+                    Macros: {
+                        RR: "{\\bf R}"
+                    }
+                }
+            },
+            // Learn about plugins: https://revealjs.com/plugins/
+            plugins: [RevealMarkdown, RevealHighlight, RevealNotes, RevealMath]
+        });
+
+        var data = {
+            "author": "Guest",
+            "title": "Title",
+            "subtitle": "Subtitle",
+            "author_description": ""
+        }
+
+        for (let i in data) {
+            if (Array.isArray(data[i]) == false && document.getElementById(i) != null) {
+                console.log(i)
+                document.getElementById(i).innerHTML = data[i];
+            }
+        }
+    </script>
+
+</body>
+
+</html>
